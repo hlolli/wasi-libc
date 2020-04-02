@@ -32,6 +32,9 @@ static const struct ioctl_compat_map compat_map[] = {
 	{ SIOCGSTAMP, SIOCGSTAMP_OLD, 8, R, 0, OFFS(0, 4) },
 	{ SIOCGSTAMPNS, SIOCGSTAMPNS_OLD, 8, R, 0, OFFS(0, 4) },
 
+        /* SNDRV_PCM_IOCTL_INFO */
+        { _IOR('A', 0x01, char[288]),  _IOR('A', 0x01, 288), 288, R, 0, OFFS(0,4,8,12,16,80,160,192,196,200,204,208,224) },
+
 	/* SNDRV_TIMER_IOCTL_STATUS */
 	{ _IOR('T', 0x14, char[96]), _IOR('T', 0x14, 88), 88, R, 0, OFFS(0,4) },
 
@@ -120,8 +123,12 @@ int ioctl(int fd, int req, ...)
 	arg = va_arg(ap, void *);
 	va_end(ap);
 	int r = __syscall(SYS_ioctl, fd, req, arg);
+        printf("r1: %d \n", r);
+        printf("fd1: %d \n", fd);
+        printf("req: %d \n", req);
 	if (SIOCGSTAMP != SIOCGSTAMP_OLD && req && r==-ENOTTY) {
 		for (int i=0; i<sizeof compat_map/sizeof *compat_map; i++) {
+                        printf("i: %d new_req: %d req: %d \n", i, compat_map[i].new_req, req);
 			if (compat_map[i].new_req != req) continue;
 			union {
 				long long align;
